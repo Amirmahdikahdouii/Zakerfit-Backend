@@ -13,7 +13,7 @@ class CustomUserManager(BaseUserManager):
             return phone_number.national_number
         raise ValueError("Phone number is not valid")
 
-    def create_user(self, phone_number, first_name, last_name, password=None, **options):
+    def create_user(self, phone_number, first_name, last_name, password=None, email=None, **options):
         if password is None:
             raise ValueError("Password is required")
         obj = self.model(
@@ -22,6 +22,8 @@ class CustomUserManager(BaseUserManager):
             last_name=last_name,
             **options
         )
+        if email is not None:
+            obj.email = self.normalize_email(email)
         obj.set_password(password)
         obj.save()
         return obj
@@ -31,4 +33,3 @@ class CustomUserManager(BaseUserManager):
         obj.is_admin = True
         obj.save()
         return obj
-
