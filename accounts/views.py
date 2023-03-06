@@ -1,3 +1,40 @@
-from django.shortcuts import render
+# Views
+from rest_framework.views import APIView
 
-# Create your views here.
+# Response
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+
+# Serializers
+from .serializers import PhoneNumberValidationSerializer
+
+# Models
+from .models import User, PhoneNumberValidation
+
+
+class GetVerificationCode(APIView):
+    """
+    ApiView to create a Phone number validation code, and start verifying users phone number
+    """
+    serializer_class = PhoneNumberValidationSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            import kavenegar
+            """
+            We use kavenegar for sms verification sending
+            for full document read: https://github.com/kavenegar/kavenegar-python
+            """
+            serializer.save()
+            sms_api = kavenegar.KavenegarAPI(
+                "ِYour Kavenegar Key here",
+            )
+            sms_api_params = {
+                "sender": "10008663",
+                "receptor": "0" + serializer.validated_data['phone_number'],
+                "message": f"باشگاه ورزشی مایوستاتین \n کد تایید: {serializer.data.get('validation_code')}"
+            }
+            sms_api.sms_send(sms_api_params)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)

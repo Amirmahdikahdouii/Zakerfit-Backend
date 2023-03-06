@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 # Managers
-from .managers import CustomUserManager
+from .managers import CustomUserManager, PhoneNumberValidationManager
 
 
 class User(AbstractBaseUser):
@@ -41,3 +41,18 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+
+
+class PhoneNumberValidation(models.Model):
+    """
+    This model save phone number and validation code to verify user phone number,
+    and creation_date field for checking time of verifying user.
+    """
+    phone_number = models.CharField(max_length=10)
+    validation_code = models.CharField(max_length=6)
+    creation_date = models.DateTimeField(auto_now=True)
+
+    objects = PhoneNumberValidationManager()
+
+    def __str__(self):
+        return self.phone_number

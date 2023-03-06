@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .forms import UserCreationForm, UserChangeForm
-from .models import User
+from .models import User, PhoneNumberValidation
 from django.contrib.auth.models import Group
 
 
@@ -27,3 +27,14 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
+
+
+class PhoneNumberValidationAdmin(admin.ModelAdmin):
+    class Meta:
+        model = PhoneNumberValidation
+
+    list_display = ("phone_number", "validation_code")
+    ordering = ("-creation_date",)
+
+
+admin.site.register(PhoneNumberValidation, PhoneNumberValidationAdmin)
