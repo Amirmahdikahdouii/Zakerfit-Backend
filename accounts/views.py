@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from accounts.serializers import PhoneNumberValidationSerializer, VerifyPhoneNumberCodeSerializer, UserSerializer
 
-from accounts.models import User
+from accounts.models import User, PhoneNumberValidation
 
 
 class GetVerificationCode(APIView):
@@ -54,6 +54,12 @@ class ConfirmValidationCode(APIView):
                 """
                 user_obj = User.objects.get(phone_number=phone_number)
             except User.DoesNotExist:
+                from django.utils.crypto import get_random_string
+                data['verify_token'] = get_random_string(length=32)
+                # Add a new token for using to register a user by his phone number
+                obj = PhoneNumberValidation.objects.get(phone_number=phone_number)
+                obj.verification_token = data['verify_token']
+                obj.save()
                 return Response(data, status=200)
             data['user'] = {
                 "phone_number": user_obj.phone_number,

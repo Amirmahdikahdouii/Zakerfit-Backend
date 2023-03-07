@@ -30,6 +30,10 @@ class PhoneNumberValidationSerializer(serializers.ModelSerializer):
 
 
 class VerifyPhoneNumberCodeSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        instance = dict(instance)
+        return {"phone_number": instance['phone_number']}
+
     class Meta:
         model = PhoneNumberValidation
         fields = ("phone_number", "validation_code")
@@ -52,10 +56,14 @@ class VerifyPhoneNumberCodeSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, max_length=100)
     password2 = serializers.CharField(write_only=True, max_length=100)
+    verify_token = serializers.CharField(write_only=True, max_length=32)
 
     class Meta:
         model = User
-        fields = ('phone_number', "email", "first_name", "last_name", "gender", "age", "password1", "password2")
+        fields = (
+            'phone_number', "email", "first_name", "last_name", "gender", "age",
+            "password1", "password2", "verify_token"
+        )
 
     def validate_phone_number(self, value):
         try:
@@ -76,9 +84,14 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "password2": ["password1 and password2 are not match", ]
             })
+        token = data.get("verify_token")
+        obj = PhoneNumberValidation.objects.get(phone_number=data['phone_number'])
+        if obj.verification_token != token:
+            raise serializers.ValidationError({"verify_token": "Verification token is not correct"})
         return data
 
     def create(self, validated_data):
         validated_data.pop("password1")
+        validated_data.pop("verify_token")
         password = validated_data.pop("password2")
         return User.objects.create_user(password=password, **validated_data)
