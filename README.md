@@ -33,6 +33,47 @@ And Output Will contained Phone Number and Verification Code:
 }
 ```
 
+- /accounts/confirm-verification-code/
+
+##### Allowed Method: `POST`
+
+In this Endpoint, you can send phone number and verification code to this endpoint, then check the timeout, phone number
+and code that have been sent. Then if phone number was already registered, return the user and if it's not, return
+nothing.
+
+Your sending data should be something like this:
+
+```json
+{
+  "phone_number": "9123456789",
+  "validation_code": "123456"
+}
+```
+
+Output Will be something like this if User Does not exist:
+
+```json
+{
+  "phone_number": "9123456789",
+  "verification_code": "123456"
+}
+```
+
+And if user exists:
+
+```json
+{
+  "phone_number": "9123456789",
+  "verification_code": "123456",
+  "user": {
+    "phone_number": "9123456789",
+    "email": "example@info.com",
+    "first_name": "User First name",
+    "last_name": "User Last name"
+  }
+}
+```
+
 ## Todo:
 
 - [x] Customize User model
