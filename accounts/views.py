@@ -1,15 +1,10 @@
-# Views
 from rest_framework.views import APIView
 
-# Response
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
-# Serializers
-from .serializers import PhoneNumberValidationSerializer
+from .serializers import PhoneNumberValidationSerializer, VerifyPhoneNumberCode
 
-# Models
-from .models import User, PhoneNumberValidation
+from .models import User
 
 
 class GetVerificationCode(APIView):
@@ -38,3 +33,32 @@ class GetVerificationCode(APIView):
             sms_api.sms_send(sms_api_params)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
+
+class ConfirmValidationCode(APIView):
+    """
+    In this Endpoint, confirm validation code will do and return user if it exists.
+    """
+    serializer_class = VerifyPhoneNumberCode
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            data = serializer.data
+            phone_number = data.get("phone_number")
+            try:
+                """
+                If user DoesNotExists, Return only phone_number and verification code and trying to register
+                new user, but if phone number was already registered, return the user info
+                """
+                user_obj = User.objects.get(phone_number=phone_number)
+            except User.DoesNotExist:
+                return Response(data, status=200)
+            data['user'] = {
+                "phone_number": user_obj.phone_number,
+                "email": user_obj.email,
+                "first_name": user_obj.first_name,
+                "last_name": user_obj.last_name,
+            }
+            return Response(data, status=200)
+        return Response(serializer.errors, status=401)
