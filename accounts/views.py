@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 
 from rest_framework.response import Response
 
-from .serializers import PhoneNumberValidationSerializer, VerifyPhoneNumberCode
+from accounts.serializers import PhoneNumberValidationSerializer, VerifyPhoneNumberCodeSerializer, UserSerializer
 
-from .models import User
+from accounts.models import User
 
 
 class GetVerificationCode(APIView):
@@ -39,7 +40,7 @@ class ConfirmValidationCode(APIView):
     """
     In this Endpoint, confirm validation code will do and return user if it exists.
     """
-    serializer_class = VerifyPhoneNumberCode
+    serializer_class = VerifyPhoneNumberCodeSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -62,3 +63,8 @@ class ConfirmValidationCode(APIView):
             }
             return Response(data, status=200)
         return Response(serializer.errors, status=401)
+
+
+class RegisterNewUserAPIView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

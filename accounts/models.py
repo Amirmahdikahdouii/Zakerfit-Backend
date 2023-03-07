@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
-# Managers
-from .managers import CustomUserManager, PhoneNumberValidationManager
+
+from accounts.managers import CustomUserManager, PhoneNumberValidationManager
 
 
 class User(AbstractBaseUser):

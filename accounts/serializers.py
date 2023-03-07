@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import PhoneNumberValidation
+from .models import PhoneNumberValidation, User
 from .managers import NormalizePhoneNumber
 
 
@@ -29,7 +29,7 @@ class PhoneNumberValidationSerializer(serializers.ModelSerializer):
         return PhoneNumberValidation.objects.update_validation_code(validated_data['phone_number'])
 
 
-class VerifyPhoneNumberCode(serializers.ModelSerializer):
+class VerifyPhoneNumberCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PhoneNumberValidation
         fields = ("phone_number", "validation_code")
@@ -47,3 +47,38 @@ class VerifyPhoneNumberCode(serializers.ModelSerializer):
         elif obj.validation_code != data.get("validation_code"):
             raise serializers.ValidationError("Verification code is not correct")
         return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+    password1 = serializers.CharField(write_only=True, max_length=100)
+    password2 = serializers.CharField(write_only=True, max_length=100)
+
+    class Meta:
+        model = User
+        fields = ('phone_number', "email", "first_name", "last_name", "gender", "age", "password1", "password2")
+
+    def validate_phone_number(self, value):
+        try:
+            PhoneNumberValidation.objects.get(phone_number=value)
+        except PhoneNumberValidation.DoesNotExist:
+            raise serializers.ValidationError("Phone Number Should Validate First")
+        return value
+
+    def validate_age(self, value):
+        if value is not None and (value < 3 or value > 80):
+            raise serializers.ValidationError("user age is not allow to register")
+        return value
+
+    def validate(self, data):
+        password1 = data.get("password1")
+        password2 = data.get("password2")
+        if password1 != password2:
+            raise serializers.ValidationError({
+                "password2": ["password1 and password2 are not match", ]
+            })
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop("password1")
+        password = validated_data.pop("password2")
+        return User.objects.create_user(password=password, **validated_data)
