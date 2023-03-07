@@ -51,6 +51,7 @@ class PhoneNumberValidation(models.Model):
     phone_number = models.CharField(max_length=10)
     validation_code = models.CharField(max_length=6)
     creation_date = models.DateTimeField(auto_now=True)
+    verification_token = models.CharField(max_length=32, null=True, blank=True)
 
     objects = PhoneNumberValidationManager()
 
