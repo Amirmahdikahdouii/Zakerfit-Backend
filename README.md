@@ -38,8 +38,10 @@ And Output Will contained Phone Number and Verification Code:
 __Allowed Method__: `POST`
 
 In this Endpoint, you can send phone number and verification code to this endpoint, then check the timeout, phone number
-and code that have been sent. Then if phone number was already registered, return the user and if it's not, return
-nothing.
+and code that have been sent, and validate phone number and return a 32 character code to registering new user by using
+it.
+
+__Note:__ if phone number was already validate, return `409 HTTP Response`
 
 Your sending data should be something like this:
 
@@ -59,21 +61,7 @@ Output Will be something like this if User Does not exist:
 }
 ```
 
-And if user exists:
-
-```json
-{
-  "phone_number": "9123456789",
-  "user": {
-    "phone_number": "9123456789",
-    "email": "example@info.com",
-    "first_name": "User First name",
-    "last_name": "User Last name"
-  }
-}
-```
-
-- /accounts/get-verify-token//
+- /accounts/get-verify-token/
 
 __Allowed Method__: `POST`
 
@@ -148,6 +136,54 @@ If user create successfully, you will get `HTTP 201 Created`, and user object li
   "last_name": "Kahdouii",
   "gender": 1,
   "age": 18
+}
+```
+
+- /accounts/token/
+
+In This endpoint you can get JWT Token by sending phone_number and password data.
+
+__Allowed Method:__ `POST`
+
+__Note:__ Access token lifetime was change into 10 minutes, you can change it in **config/settings.py**
+
+Sending Data Example:
+
+```json
+{
+  "phone_number": "9123456789",
+  "password": "********"
+}
+```
+
+Output Example:
+
+```json
+{
+  "access": "access token",
+  "refresh": "refresh token"
+}
+```
+
+- /accounts/token/refresh/
+
+In This endpoint you can get New access Token by using refresh token.
+
+__Allowed Method:__ `POST`
+
+Sending Data Example:
+
+```json
+{
+  "refresh": "refresh token"
+}
+```
+
+Output Example:
+
+```json
+{
+  "access": "new access token"
 }
 ```
 

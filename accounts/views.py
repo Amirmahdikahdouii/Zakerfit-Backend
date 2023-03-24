@@ -50,9 +50,10 @@ class ConfirmValidationCode(APIView):
             try:
                 """
                 If user DoesNotExists, Return only phone_number and verification code and trying to register
-                new user, but if phone number was already registered, return the user info
+                new user, but if phone number was already registered, return 409 HTTP Response.
                 """
-                user_obj = User.objects.get(phone_number=phone_number)
+                User.objects.get(phone_number=phone_number)
+                return Response(status=409)
             except User.DoesNotExist:
                 from django.utils.crypto import get_random_string
                 data['verify_token'] = get_random_string(length=32)
@@ -61,13 +62,6 @@ class ConfirmValidationCode(APIView):
                 obj.verification_token = data['verify_token']
                 obj.save()
                 return Response(data, status=200)
-            data['user'] = {
-                "phone_number": user_obj.phone_number,
-                "email": user_obj.email,
-                "first_name": user_obj.first_name,
-                "last_name": user_obj.last_name,
-            }
-            return Response(data, status=200)
         return Response(serializer.errors, status=401)
 
 
