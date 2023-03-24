@@ -73,6 +73,32 @@ And if user exists:
 }
 ```
 
+- /accounts/get-verify-token//
+
+__Allowed Method__: `POST`
+
+In this Endpoint, you can verify_token by the number that you have get verification code and validate as a
+valid number in model.
+
+__Note:__ if the phone number was not valid yet, you get `404 HTTP Not Found` and if phone_number has no verify_token
+response will be `401 HTTP Unauthorized`.
+
+Your sending data should be something like this:
+
+```json
+{
+  "phone_number": "9123456789"
+}
+```
+
+Output Will be something like this if User Does not exist:
+
+```json
+{
+  "verify_token": "32 char Token"
+}
+```
+
 - /accounts/register/
 
 In this EndPoint you can use your validated mobile phone number to register into Website.

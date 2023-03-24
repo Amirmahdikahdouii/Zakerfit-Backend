@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveAPIView
 
 from rest_framework.response import Response
 
@@ -69,6 +69,18 @@ class ConfirmValidationCode(APIView):
             }
             return Response(data, status=200)
         return Response(serializer.errors, status=401)
+
+
+class GetVerifyTokenAPIView(APIView):
+    def post(self, request):
+        phone_number = request.data.get("phone_number")
+        try:
+            obj = PhoneNumberValidation.objects.get(phone_number=phone_number)
+            if obj.verification_token is not None:
+                return Response({"token": obj.verification_token})
+        except PhoneNumberValidation.DoesNotExist:
+            return Response(status=404)
+        return Response(status=401)
 
 
 class RegisterNewUserAPIView(CreateAPIView):
